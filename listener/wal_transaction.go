@@ -148,7 +148,8 @@ func (w *WalTransaction) CreateEventsWithFilter(
 
 		actions, validTable := tableMap[item.Table]
 		validAction := inArray(actions, item.Kind.string())
-		if validTable && validAction {
+		// If tableMap is empty (no filter), permit all events
+		if len(tableMap) == 0 || (validTable && validAction) {
 			events = append(events, event)
 		} else {
 			logrus.WithFields(

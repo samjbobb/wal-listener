@@ -57,10 +57,10 @@ type repository interface {
 
 // Listener main service struct.
 type Listener struct {
-	mu         sync.RWMutex
-	config     config.Config
-	slotName   string
-	publisher  publisher
+	mu       sync.RWMutex
+	config   config.Config
+	slotName string
+	//publisher  publisher
 	replicator replication
 	repository repository
 	parser     parser
@@ -73,13 +73,13 @@ func NewWalListener(
 	cfg *config.Config,
 	repo repository,
 	repl replication,
-	publ publisher,
+	//publ publisher,
 	parser parser,
 ) *Listener {
 	return &Listener{
-		slotName:   fmt.Sprintf("%s_%s", cfg.Listener.SlotName, cfg.Database.Name),
-		config:     *cfg,
-		publisher:  publ,
+		slotName: fmt.Sprintf("%s_%s", cfg.Listener.SlotName, cfg.Database.Name),
+		config:   *cfg,
+		//publisher:  publ,
 		repository: repo,
 		replicator: repl,
 		parser:     parser,
@@ -236,17 +236,28 @@ func (l *Listener) Stream(ctx context.Context) {
 				if tx.CommitTime != nil {
 					natsEvents := tx.CreateEventsWithFilter(l.config.Database.Filter.Tables)
 					for _, event := range natsEvents {
-						subjectName := event.GetSubjectName(l.config.Nats.TopicPrefix)
-						if err = l.publisher.Publish(subjectName, event); err != nil {
-							l.errChannel <- fmt.Errorf("%v: %w", ErrPublishEvent, err)
-							continue
-						} else {
-							logrus.
-								WithField("subject", subjectName).
-								WithField("action", event.Action).
-								WithField("lsn", l.readLSN()).
-								Infoln("event was send")
-						}
+						//subjectName := event.GetSubjectName(l.config.Nats.TopicPrefix)
+						logrus.
+							WithField("id", event.ID).
+							WithField("schema", event.Schema).
+							WithField("table", event.Table).
+							WithField("action", event.Action).
+							WithField("data", event.Data).
+							WithField("commitTime", event.EventTime).
+							WithField("lsn", l.readLSN()).
+							WithField("relation_store", tx.RelationStore).
+							Infoln("event was sent")
+
+						//if err = l.publisher.Publish(subjectName, event); err != nil {
+						//	l.errChannel <- fmt.Errorf("%v: %w", ErrPublishEvent, err)
+						//	continue
+						//} else {
+						//	logrus.
+						//		WithField("subject", subjectName).
+						//		WithField("action", event.Action).
+						//		WithField("lsn", l.readLSN()).
+						//		Infoln("event was send")
+						//}
 					}
 					tx.Clear()
 				}
@@ -283,10 +294,10 @@ func (l *Listener) Stream(ctx context.Context) {
 // Stop is a finalizer function.
 func (l *Listener) Stop() error {
 	var err error
-	err = l.publisher.Close()
-	if err != nil {
-		return err
-	}
+	//err = l.publisher.Close()
+	//if err != nil {
+	//	return err
+	//}
 	err = l.repository.Close()
 	if err != nil {
 		return err

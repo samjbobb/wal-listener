@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nats-io/stan.go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
@@ -41,19 +40,19 @@ func main() {
 
 			initLogger(cfg.Logger)
 
-			sc, err := stan.Connect(cfg.Nats.ClusterID, cfg.Nats.ClientID, stan.NatsURL(cfg.Nats.Address))
-			if err != nil {
-				logrus.WithError(err).Fatalln(listener.ErrNatsConnection)
-			}
+			//sc, err := stan.Connect(cfg.Nats.ClusterID, cfg.Nats.ClientID, stan.NatsURL(cfg.Nats.Address))
+			//if err != nil {
+			//	logrus.WithError(err).Fatalln(listener.ErrNatsConnection)
+			//}
 
 			conn, rConn, err := initPgxConnections(cfg.Database)
 			if err != nil {
 				logrus.Fatal(err)
 			}
 			repo := listener.NewRepository(conn)
-			natsPublisher := listener.NewNatsPublisher(sc)
+			//natsPublisher := listener.NewNatsPublisher(sc)
 			parser := listener.NewBinaryParser(binary.BigEndian)
-			service := listener.NewWalListener(cfg, repo, rConn, natsPublisher, parser)
+			service := listener.NewWalListener(cfg, repo, rConn, parser)
 			return service.Process()
 		},
 	}

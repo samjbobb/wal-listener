@@ -4,20 +4,20 @@ listener:
   heartbeatInterval: 10s
 logger:
   caller: false
-  level: info
+  level: debug
   humanReadable: true
 database:
-  host: localhost
+  host: sjb-dev
   port: 5432
-  name: test_db
-  user: back
-  debug: false
-  password: pass
-  filter:
-    tables:
-      users:
-        - insert
-        - update
+  name: app
+  user: postgres
+#  debug: false
+  password: password
+#  filter:
+#    tables:
+#      users:
+#        - insert
+#        - update
 nats:
   address: localhost:4222
   clusterID: test-cluster
